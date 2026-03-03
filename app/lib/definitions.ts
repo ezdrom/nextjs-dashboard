@@ -40,10 +40,13 @@ export type LatestPayment = {
 };
 
 // The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestPaymentRaw = Omit<Payment, 'amount'> & {
-  amount: number;
+export type LatestPaymentRaw = {
+  id: string;
+  amount: number;      // from payments.amount
+  name: string;        // from friends.name
+  email: string;       // from friends.email
+  image_url: string;   // from friends.image_url
 };
-
 export type PaymentsTable = {
   id: string;
   friend_id: string;
