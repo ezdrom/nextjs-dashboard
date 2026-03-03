@@ -9,16 +9,16 @@ export type User = {
   password: string;
 };
 
-export type Customer = {
+export type Friend = {
   id: string;
   name: string;
   email: string;
   image_url: string;
 };
 
-export type Invoice = {
+export type Payment = {
   id: string;
-  customer_id: string;
+  friend_id: string;
   amount: number;
   date: string;
   // In TypeScript, this is called a string union type.
@@ -31,7 +31,7 @@ export type Revenue = {
   revenue: number;
 };
 
-export type LatestInvoice = {
+export type LatestPayment = {
   id: string;
   name: string;
   image_url: string;
@@ -40,13 +40,13 @@ export type LatestInvoice = {
 };
 
 // The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, 'amount'> & {
+export type LatestPaymentRaw = Omit<Payment, 'amount'> & {
   amount: number;
 };
 
-export type InvoicesTable = {
+export type PaymentsTable = {
   id: string;
-  customer_id: string;
+  friend_id: string;
   name: string;
   email: string;
   image_url: string;
@@ -55,34 +55,34 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
-export type CustomersTableType = {
+export type FriendsTableType = {
   id: string;
   name: string;
   email: string;
   image_url: string;
-  total_invoices: number;
+  total_payments: number;
   total_pending: number;
   total_paid: number;
 };
 
-export type FormattedCustomersTable = {
+export type FormattedFriendsTable = {
   id: string;
   name: string;
   email: string;
   image_url: string;
-  total_invoices: number;
+  total_payments: number;
   total_pending: string;
   total_paid: string;
 };
 
-export type CustomerField = {
+export type FriendField = {
   id: string;
   name: string;
 };
 
-export type InvoiceForm = {
+export type DebtForm = {
   id: string;
-  customer_id: string;
+  friend_id: string;
   amount: number;
   status: 'pending' | 'paid';
 };

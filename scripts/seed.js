@@ -1,7 +1,7 @@
 const { db } = require('@vercel/postgres');
 const {
-  invoices,
-  customers,
+  payments,
+  friends,
   revenue,
   users,
 } = require('../app/lib/placeholder-data.js');
@@ -46,53 +46,53 @@ async function seedUsers(client) {
   }
 }
 
-async function seedInvoices(client) {
+async function seedPayments(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-    // Create the "invoices" table if it doesn't exist
+    // Create the "payments" table if it doesn't exist
     const createTable = await client.sql`
-    CREATE TABLE IF NOT EXISTS invoices (
+    CREATE TABLE IF NOT EXISTS payments (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    customer_id UUID NOT NULL,
+    friend_id UUID NOT NULL,
     amount INT NOT NULL,
     status VARCHAR(255) NOT NULL,
     date DATE NOT NULL
   );
 `;
 
-    console.log(`Created "invoices" table`);
+    console.log(`Created "payments" table`);
 
-    // Insert data into the "invoices" table
-    const insertedInvoices = await Promise.all(
-      invoices.map(
-        (invoice) => client.sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
+    // Insert data into the "payments" table
+    const insertedPayments = await Promise.all(
+      payments.map(
+        (payment) => client.sql`
+        INSERT INTO payments (friend_id, amount, status, date)
+        VALUES (${payment.friend_id}, ${payment.amount}, ${payment.status}, ${payment.date})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
     );
 
-    console.log(`Seeded ${insertedInvoices.length} invoices`);
+    console.log(`Seeded ${insertedPayments.length} payments`);
 
     return {
       createTable,
-      invoices: insertedInvoices,
+      payments: insertedPayments,
     };
   } catch (error) {
-    console.error('Error seeding invoices:', error);
+    console.error('Error seeding payments:', error);
     throw error;
   }
 }
 
-async function seedCustomers(client) {
+async function seedFriends(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-    // Create the "customers" table if it doesn't exist
+    // Create the "friends" table if it doesn't exist
     const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS customers (
+      CREATE TABLE IF NOT EXISTS friends (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
@@ -100,27 +100,27 @@ async function seedCustomers(client) {
       );
     `;
 
-    console.log(`Created "customers" table`);
+    console.log(`Created "friends" table`);
 
-    // Insert data into the "customers" table
-    const insertedCustomers = await Promise.all(
-      customers.map(
-        (customer) => client.sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+    // Insert data into the "friends" table
+    const insertedFriends = await Promise.all(
+      friends.map(
+        (friend) => client.sql`
+        INSERT INTO friends (id, name, email, image_url)
+        VALUES (${friend.id}, ${friend.name}, ${friend.email}, ${friend.image_url})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
     );
 
-    console.log(`Seeded ${insertedCustomers.length} customers`);
+    console.log(`Seeded ${insertedFriends.length} friends`);
 
     return {
       createTable,
-      customers: insertedCustomers,
+      friends: insertedFriends,
     };
   } catch (error) {
-    console.error('Error seeding customers:', error);
+    console.error('Error seeding friends:', error);
     throw error;
   }
 }
@@ -164,8 +164,8 @@ async function main() {
   const client = await db.connect();
 
   await seedUsers(client);
-  await seedCustomers(client);
-  await seedInvoices(client);
+  await seedFriends(client);
+  await seedPayments(client);
   await seedRevenue(client);
 
   await client.end();
