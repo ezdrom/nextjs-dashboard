@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import { lusitana } from '@/app/ui/fonts';
 
 export const metadata: Metadata = {
-  title: 'Customers',
+  title: 'Friends',
 };
-export default function Customers() {
+export default function Friends() {
   return <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
     Dashboard
   </h1>

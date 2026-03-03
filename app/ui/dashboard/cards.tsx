@@ -8,32 +8,28 @@ import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
-  collected: BanknotesIcon,
-  customers: UserGroupIcon,
-  pending: ClockIcon,
-  invoices: InboxIcon,
+  numberOfPayments: BanknotesIcon,
+  numberofFriends: UserGroupIcon,
+  totalPendingPayments: ClockIcon,
+  totalPaidPayments: InboxIcon,
 };
 
 export default async function CardWrapper() {
   const {
-    numberOfInvoices,
-    numberOfCustomers,
-    totalPaidInvoices,
-    totalPendingInvoices
+    numberOfPayments,
+    numberOfFriends,
+    totalPaidPayments,
+    totalPendingPayments
   } = await fetchCardData();
 
   return (
     <>
       {/* NOTE: comment in this code when you get to this point in the course */}
 
-      <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-      <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
-      />
+      <Card title="Total Paid Payments" value={numberOfPayments} type="totalPaidPayments" />
+      <Card title="Total Pending Payments" value={totalPendingPayments} type="totalPendingPayments" />
+      <Card title="Number of Payments" value={totalPaidPayments} type="numberOfPayments" />
+      <Card title="Number of Friends" value={numberOfFriends} type="numberofFriends" />
     </>
   );
 }
@@ -45,7 +41,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected';
+  type: 'numberOfPayments' | 'numberofFriends' | 'totalPendingPayments' | 'totalPaidPayments';
 }) {
   const Icon = iconMap[type];
 

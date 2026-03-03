@@ -1,10 +1,10 @@
 import { sql } from '@vercel/postgres';
 import {
-  CustomerField,
-  CustomersTableType,
-  InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
+  FriendField,
+  FriendsTableType,
+  DebtForm,
+  PaymentsTable,
+  LatestPaymentRaw,
   User,
   Revenue,
 } from './definitions';
@@ -36,24 +36,24 @@ export async function fetchRevenue() {
   }
 }
 
-export async function fetchLatestInvoices() {
+export async function fetchLatestPayments() {
   noStore();
   try {
-    const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
+    const data = await sql<LatestPaymentRaw>`
+      SELECT payments.amount, friends.name, friends.image_url, friends.email, payments.id
+      FROM payments
+      JOIN friends ON payments.friend_id = friends.id
+      ORDER BY payments.date DESC
       LIMIT 5`;
 
-    const latestInvoices = data.rows.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
+    const latestPayments = data.rows.map((payment) => ({
+      ...payment,
+      amount: formatCurrency(payment.amount),
     }));
-    return latestInvoices;
+    return latestPayments;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
+    throw new Error('Failed to fetch the latest payments.');
   }
 }
 
@@ -63,29 +63,29 @@ export async function fetchCardData() {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
-    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    const invoiceStatusPromise = sql`SELECT
+    const paymentCountPromise = sql`SELECT COUNT(*) FROM payments`;
+    const friendCountPromise = sql`SELECT COUNT(*) FROM friends`;
+    const paymentStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-         FROM invoices`;
+         FROM payments`;
 
     const data = await Promise.all([
-      invoiceCountPromise,
-      customerCountPromise,
-      invoiceStatusPromise,
+      paymentCountPromise,
+      friendCountPromise,
+      paymentStatusPromise,
     ]);
 
-    const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
+    const numberOfPayments = Number(data[0].rows[0].count ?? '0');
+    const numberOfFriends = Number(data[1].rows[0].count ?? '0');
+    const totalPaidPayments = formatCurrency(data[2].rows[0].paid ?? '0');
+    const totalPendingPayments = formatCurrency(data[2].rows[0].pending ?? '0');
 
     return {
-      numberOfCustomers,
-      numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
+      numberOfFriends,
+      numberOfPayments,
+      totalPaidPayments,
+      totalPendingPayments,
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -94,139 +94,139 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchFilteredInvoices(
+export async function fetchFilteredPayments(
   query: string,
   currentPage: number,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const invoices = await sql<InvoicesTable>`
+    const payments = await sql<PaymentsTable>`
       SELECT
-        invoices.id,
-        invoices.amount,
-        invoices.date,
-        invoices.status,
-        customers.name,
-        customers.email,
-        customers.image_url
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
+        payments.id,
+        payments.amount,
+        payments.date,
+        payments.status,
+        friends.name,
+        friends.email,
+        friends.image_url
+      FROM payments
+      JOIN friends ON payments.friend_id = friends.id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
+        friends.name ILIKE ${`%${query}%`} OR
+        friends.email ILIKE ${`%${query}%`} OR
+        payments.amount::text ILIKE ${`%${query}%`} OR
+        payments.date::text ILIKE ${`%${query}%`} OR
+        payments.status ILIKE ${`%${query}%`}
+      ORDER BY payments.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
-    return invoices.rows;
+    return payments.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoices.');
+    throw new Error('Failed to fetch payments.');
   }
 }
 
-export async function fetchInvoicesPages(query: string) {
+export async function fetchPaymentsPages(query: string) {
   noStore();
   try {
     const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
+    FROM payments
+    JOIN friends ON payments.friend_id = friends.id
     WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
+      friends.name ILIKE ${`%${query}%`} OR
+      friends.email ILIKE ${`%${query}%`} OR
+      payments.amount::text ILIKE ${`%${query}%`} OR
+      payments.date::text ILIKE ${`%${query}%`} OR
+      payments.status ILIKE ${`%${query}%`}
   `;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of payments.');
   }
 }
 
-export async function fetchInvoiceById(id: string) {
+export async function fetchPaymentById(id: string) {
   noStore();
   try {
-    const data = await sql<InvoiceForm>`
+    const data = await sql<DebtForm>`
       SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
+        payments.id,
+        payments.friend_id,
+        payments.amount,
+        payments.status
+      FROM payments
+      WHERE payments.id = ${id};
     `;
 
-    const invoice = data.rows.map((invoice) => ({
-      ...invoice,
+    const payment = data.rows.map((payment) => ({
+      ...payment,
       // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
+      amount: payment.amount / 100,
     }));
-    console.log(invoice); // Invoice is an empty array []
-    return invoice[0];
+    console.log(payment); // Payment is an empty array []
+    return payment[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    throw new Error('Failed to fetch payment.');
   }
 }
 
-export async function fetchCustomers() {
+export async function fetchFriends() {
   noStore();
   try {
-    const data = await sql<CustomerField>`
+    const data = await sql<FriendField>`
       SELECT
         id,
         name
-      FROM customers
+      FROM friends
       ORDER BY name ASC
     `;
 
-    const customers = data.rows;
-    return customers;
+    const friends = data.rows;
+    return friends;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Failed to fetch all friends.');
   }
 }
 
-export async function fetchFilteredCustomers(query: string) {
+export async function fetchFilteredFriends(query: string) {
   noStore();
   try {
-    const data = await sql<CustomersTableType>`
+    const data = await sql<FriendsTableType>`
 		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
+		  friends.id,
+		  friends.name,
+		  friends.email,
+		  friends.image_url,
+		  COUNT(payments.id) AS total_payments,
+		  SUM(CASE WHEN payments.status = 'pending' THEN payments.amount ELSE 0 END) AS total_pending,
+		  SUM(CASE WHEN payments.status = 'paid' THEN payments.amount ELSE 0 END) AS total_paid
+		FROM friends
+		LEFT JOIN payments ON friends.id = payments.friend_id
 		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
+		  friends.name ILIKE ${`%${query}%`} OR
+        friends.email ILIKE ${`%${query}%`}
+		GROUP BY friends.id, friends.name, friends.email, friends.image_url
+		ORDER BY friends.name ASC
 	  `;
 
-    const customers = data.rows.map((customer) => ({
-      ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
+    const friends = data.rows.map((friend) => ({
+      ...friend,
+      total_pending: formatCurrency(friend.total_pending),
+      total_paid: formatCurrency(friend.total_paid),
     }));
 
-    return customers;
+    return friends;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    throw new Error('Failed to fetch friend table.');
   }
 }
 
