@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --payne-50: #eef2f4;
+  --payne-500: #536878;
+  --payne-600: #455364;
+}
+
+body {
+  @apply bg-payne-50/30;
+}
+
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;

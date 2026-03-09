@@ -20,7 +20,7 @@ export default async function FriendsTable({
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
-            <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
+            <div className="overflow-hidden rounded-md bg-payne-50 p-2 md:pt-0">
               <div className="md:hidden">
                 {friends?.map((friend) => (
                   <div
@@ -41,7 +41,7 @@ export default async function FriendsTable({
                             <p>{friend.name}</p>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-payne-600">
                           {friend.email}
                         </p>
                       </div>
@@ -62,8 +62,8 @@ export default async function FriendsTable({
                   </div>
                 ))}
               </div>
-              <table className="hidden min-w-full rounded-md text-gray-900 md:table">
-                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+              <table className="hidden min-w-full rounded-md text-payne-900 md:table">
+                <thead className="rounded-md bg-payne-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
                       Name
@@ -83,7 +83,7 @@ export default async function FriendsTable({
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-200 text-gray-900">
+                <tbody className="divide-y divide-payne-200 text-payne-900">
                   {friends.map((friend) => (
                     <tr key={friend.id} className="group">
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">

@@ -17,6 +17,19 @@ const config: Config = {
           500: '#0070F3',
           600: '#2F6FEB',
         },
+        // Payne's gray – blue-gray palette
+        payne: {
+          50: '#eef2f4',
+          100: '#dce2e8',
+          200: '#b8c5d1',
+          300: '#93a8ba',
+          400: '#6e8ba3',
+          500: '#536878',
+          600: '#455364',
+          700: '#373e50',
+          800: '#2a303c',
+          900: '#1c2129',
+        },
       },
     },
     keyframes: {
