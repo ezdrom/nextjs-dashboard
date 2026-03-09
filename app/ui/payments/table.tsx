@@ -16,7 +16,7 @@ export default async function PaymentsTable({
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+        <div className="rounded-lg bg-payne-50 p-2 md:pt-0">
           <div className="md:hidden">
             {payments?.map((payment) => (
               <div
@@ -35,7 +35,7 @@ export default async function PaymentsTable({
                       />
                       <p>{payment.name}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{payment.email}</p>
+                    <p className="text-sm text-payne-600">{payment.email}</p>
                   </div>
                   <PaymentStatus status={payment.status} />
                 </div>
@@ -54,7 +54,7 @@ export default async function PaymentsTable({
               </div>
             ))}
           </div>
-          <table className="hidden min-w-full text-gray-900 md:table">
+          <table className="hidden min-w-full text-payne-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
